@@ -39,26 +39,14 @@ export function UrlInput({ value, onChange, onSubmit, isLoading, statusText, pla
 
   const valid = isLikelyUrl(value);
 
-  // Apply a subtle local override if platform detected
-  const inlineStyle = platform && platform.accent ? {
-    '--ring': `from hsl(var(--primary)) h s l`, // just a mock idea, better to use the exact hex in a custom prop
-  } as React.CSSProperties : {};
-
   return (
-    <div className={cn("relative group w-full", className)}>
-      <div 
-        className={cn(
-          "absolute -inset-0.5 bg-gradient-to-r from-primary to-accent rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500",
-          platform ? "opacity-30 group-hover:opacity-50" : ""
-        )}
-        style={platform ? { background: `linear-gradient(to right, ${platform.accent}80, ${platform.accent})` } : {}}
-      />
-      <div className="relative flex items-center bg-card border rounded-xl overflow-hidden shadow-sm transition-all focus-within:ring-2 focus-within:ring-ring focus-within:border-ring">
+    <div className={cn("relative group w-full flex flex-col gap-4", className)}>
+      <div className="relative flex items-center bg-input rounded-xl overflow-hidden shadow-none transition-all focus-within:ring-2 focus-within:ring-ring focus-within:border-ring h-[51px]">
         <div className="pl-4 pr-2 flex items-center justify-center text-muted-foreground">
-          {platform ? (
+          {platform && platform.id !== 'generic' ? (
             <i className={cn(platform.icon, "text-lg")} style={{ color: platform.accent }} />
           ) : (
-            <Link2 className="w-5 h-5" />
+            <Link2 className="w-5 h-5 text-muted-foreground" />
           )}
         </div>
         <Input
@@ -66,35 +54,35 @@ export function UrlInput({ value, onChange, onSubmit, isLoading, statusText, pla
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="border-0 focus-visible:ring-0 shadow-none text-base h-14 pl-2 pr-2 bg-transparent"
+          className="border-0 focus-visible:ring-0 shadow-none text-base h-full pl-2 pr-2 bg-transparent text-foreground placeholder:text-muted-foreground w-full"
           disabled={isLoading}
         />
-        <div className="pr-2 flex items-center gap-1 shrink-0">
+        <div className="pr-2 flex items-center shrink-0">
           {value ? (
-            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground" onClick={() => onChange("")} disabled={isLoading}>
-              <X className="w-4 h-4" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl" onClick={() => onChange("")} disabled={isLoading}>
+              <X className="w-5 h-5" />
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" className="h-9 text-xs font-medium" onClick={handlePaste} disabled={isLoading}>
+            <Button variant="ghost" size="sm" className="h-9 text-sm font-semibold rounded-xl text-primary hover:text-primary hover:bg-primary/10" onClick={handlePaste} disabled={isLoading}>
               Paste
             </Button>
           )}
-          <Button 
-            onClick={onSubmit} 
-            disabled={!valid || isLoading} 
-            className="h-10 px-6 font-semibold shadow-sm transition-all"
-            style={platform ? { backgroundColor: platform.accent, color: '#fff' } : {}}
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <i className="fa-solid fa-circle-notch fa-spin" /> {statusText || "Loading"}
-              </span>
-            ) : (
-              "Extract"
-            )}
-          </Button>
         </div>
       </div>
+      
+      <Button 
+        onClick={onSubmit} 
+        disabled={!valid || isLoading} 
+        className="w-full h-[51px] rounded-xl font-semibold shadow-none text-base transition-all bg-primary hover:bg-[#B92C2C] text-primary-foreground"
+      >
+        {isLoading ? (
+          <span className="flex items-center gap-2">
+            <i className="fa-solid fa-circle-notch fa-spin" /> {statusText || "Loading"}
+          </span>
+        ) : (
+          "Extract"
+        )}
+      </Button>
     </div>
   );
 }

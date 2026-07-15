@@ -65,126 +65,138 @@ export function FormatSelector({ formats, onSelect, isLoading }: FormatSelectorP
   return (
     <div className="flex flex-col gap-4">
       {!advanced ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2 px-2">
               <FileVideo className="w-4 h-4" /> Video
             </h4>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="bg-card rounded-[32px] p-2 card-shadow flex flex-col gap-2">
               {bestVideo && (
-                <Button
-                  variant="default"
-                  className="w-full justify-between h-auto py-3 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary border border-primary/20 dark:border-primary/30"
+                <div
+                  className="flex items-center justify-between p-3 rounded-[20px] bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
                   onClick={() => onSelect(bestVideo.format_id, "video")}
-                  disabled={isLoading}
                 >
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="font-semibold text-sm">Best Quality</span>
-                    <span className="text-xs opacity-80">{bestVideo.resolution || "Unknown"} • {bestVideo.ext}</span>
-                  </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono opacity-70">{formatSize(bestVideo.filesize ?? bestVideo.filesize_approx)}</span>
-                    <Download className="w-4 h-4" />
+                    <div className="w-10 h-10 rounded-[10px] bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Download className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm text-foreground">Best Quality</span>
+                      <span className="text-xs text-muted-foreground">{bestVideo.resolution || "Unknown"} • {bestVideo.ext}</span>
+                    </div>
                   </div>
-                </Button>
+                  <div className="text-xs font-mono text-muted-foreground bg-background px-2 py-1 rounded-md">
+                    {formatSize(bestVideo.filesize ?? bestVideo.filesize_approx)}
+                  </div>
+                </div>
               )}
               {bucketedVideos.map(f => {
                 if (f.format_id === bestVideo?.format_id) return null;
                 const h = parseInt(f.resolution?.split('x')[1] || "0");
                 return (
-                  <Button
+                  <div
                     key={f.format_id}
-                    variant="outline"
-                    className="w-full justify-between h-auto py-2"
+                    className="flex items-center justify-between p-3 rounded-[20px] bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
                     onClick={() => onSelect(f.format_id, "video")}
-                    disabled={isLoading}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="bg-muted px-2 py-0.5 rounded text-xs font-medium">{getResBadge(h)}</span>
-                      <span className="text-sm">{f.resolution}</span>
-                      {f.fps && f.fps > 30 && <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">{f.fps}fps</span>}
-                    </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-muted-foreground font-mono">{formatSize(f.filesize ?? f.filesize_approx)}</span>
-                      <Download className="w-3 h-3" />
+                      <div className="w-10 h-10 rounded-[10px] bg-background text-muted-foreground flex items-center justify-center shrink-0 font-bold text-xs">
+                        {getResBadge(h)}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-sm text-foreground">{f.resolution}</span>
+                        {f.fps && f.fps > 30 ? (
+                          <span className="text-[10px] font-bold text-primary">{f.fps}fps</span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">Standard</span>
+                        )}
+                      </div>
                     </div>
-                  </Button>
+                    <div className="text-xs font-mono text-muted-foreground">
+                      {formatSize(f.filesize ?? f.filesize_approx)}
+                    </div>
+                  </div>
                 );
               })}
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-              <FileAudio className="w-4 h-4" /> Audio
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2 px-2">
+              <FileAudio className="w-4 h-4" /> Audio & Extras
             </h4>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="bg-card rounded-[32px] p-2 card-shadow flex flex-col gap-2">
               {bucketedAudio.map(({ label, f }, i) => (
-                <Button
+                <div
                   key={f.format_id}
-                  variant={i === 0 ? "secondary" : "outline"}
-                  className="w-full justify-between h-auto py-3"
+                  className="flex items-center justify-between p-3 rounded-[20px] bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
                   onClick={() => onSelect(f.format_id, "audio", "mp3")}
-                  disabled={isLoading}
                 >
-                  <div className="flex flex-col items-start gap-1">
-                    <span className="font-semibold text-sm">{label}</span>
-                    <span className="text-xs opacity-80">{f.abr ? `${f.abr} kbps • ` : ''}MP3</span>
-                  </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs opacity-70 font-mono">{formatSize(f.filesize ?? f.filesize_approx)}</span>
-                    <Download className="w-4 h-4" />
+                    <div className={cn("w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0", i === 0 ? "bg-info/10 text-info" : "bg-background text-muted-foreground")}>
+                      <FileAudio className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm text-foreground">{label}</span>
+                      <span className="text-xs text-muted-foreground">{f.abr ? `${f.abr} kbps • ` : ''}MP3</span>
+                    </div>
                   </div>
-                </Button>
+                  <div className="text-xs font-mono text-muted-foreground">
+                    {formatSize(f.filesize ?? f.filesize_approx)}
+                  </div>
+                </div>
               ))}
-            </div>
-            
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mt-4">
-              <FileImage className="w-4 h-4" /> Extras
-            </h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={() => onSelect(null, "thumbnail")} disabled={isLoading} className="h-10">
-                Thumbnail
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => onSelect(null, "subtitle")} disabled={isLoading} className="h-10">
-                Subtitles
-              </Button>
+
+              <div
+                className="flex items-center justify-between p-3 rounded-[20px] bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+                onClick={() => onSelect(null, "thumbnail")}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-[10px] bg-background text-muted-foreground flex items-center justify-center shrink-0">
+                    <FileImage className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm text-foreground">Thumbnail</span>
+                    <span className="text-xs text-muted-foreground">JPG/WEBP</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-md border bg-card text-card-foreground overflow-hidden text-sm">
+        <div className="rounded-[32px] bg-card card-shadow overflow-hidden text-sm">
           <div className="max-h-[300px] overflow-y-auto">
             <table className="w-full">
-              <thead className="bg-muted/50 sticky top-0 backdrop-blur-sm z-10">
+              <thead className="bg-secondary/50 sticky top-0 backdrop-blur-sm z-10">
                 <tr className="text-left text-xs text-muted-foreground">
-                  <th className="p-2 font-medium">ID</th>
-                  <th className="p-2 font-medium">Type</th>
-                  <th className="p-2 font-medium">Res/Bitrate</th>
-                  <th className="p-2 font-medium">Size</th>
-                  <th className="p-2 font-medium">Codec</th>
-                  <th className="p-2 font-medium">Action</th>
+                  <th className="p-3 pl-4 font-semibold">ID</th>
+                  <th className="p-3 font-semibold">Type</th>
+                  <th className="p-3 font-semibold">Res/Bitrate</th>
+                  <th className="p-3 font-semibold">Size</th>
+                  <th className="p-3 font-semibold">Codec</th>
+                  <th className="p-3 pr-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-border">
                 {formats.map(f => (
-                  <tr key={f.format_id} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-2 font-mono text-[10px] whitespace-nowrap">{f.format_id}</td>
-                    <td className="p-2 text-xs">
+                  <tr key={f.format_id} className="hover:bg-secondary/30 transition-colors">
+                    <td className="p-3 pl-4 font-mono text-[10px] whitespace-nowrap">{f.format_id}</td>
+                    <td className="p-3 text-xs">
                       {f.has_video && f.has_audio ? "A+V" : f.has_video ? "Video" : f.has_audio ? "Audio" : "Other"}
                     </td>
-                    <td className="p-2 text-xs">
+                    <td className="p-3 text-xs">
                       {f.resolution || (f.abr ? `${f.abr}k` : '-')} {f.fps ? `@${f.fps}` : ''}
                     </td>
-                    <td className="p-2 text-xs font-mono">
+                    <td className="p-3 text-xs font-mono">
                       {formatSize(f.filesize ?? f.filesize_approx) || '-'}
                     </td>
-                    <td className="p-2 text-[10px] text-muted-foreground max-w-[120px] truncate">
+                    <td className="p-3 text-[10px] text-muted-foreground max-w-[120px] truncate">
                       {f.vcodec !== 'none' ? f.vcodec : ''} {f.acodec !== 'none' ? f.acodec : ''}
                     </td>
-                    <td className="p-2">
-                      <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onSelect(f.format_id, f.has_video ? "video" : "audio")} disabled={isLoading}>
-                        <Download className="w-3 h-3" />
+                    <td className="p-3 pr-4 text-right">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" onClick={() => onSelect(f.format_id, f.has_video ? "video" : "audio")} disabled={isLoading}>
+                        <Download className="w-4 h-4" />
                       </Button>
                     </td>
                   </tr>
@@ -198,10 +210,10 @@ export function FormatSelector({ formats, onSelect, isLoading }: FormatSelectorP
       <Button
         variant="ghost"
         size="sm"
-        className="w-full text-xs text-muted-foreground mt-2"
+        className="w-fit mx-auto text-xs text-muted-foreground mt-2 rounded-full"
         onClick={() => setAdvanced(!advanced)}
       >
-        {advanced ? <><ChevronUp className="w-3 h-3 mr-1" /> Show Simple</> : <><ChevronDown className="w-3 h-3 mr-1" /> Show Advanced</>}
+        {advanced ? <><ChevronUp className="w-4 h-4 mr-1" /> Show Simple Cards</> : <><ChevronDown className="w-4 h-4 mr-1" /> Show Advanced Table</>}
       </Button>
     </div>
   );

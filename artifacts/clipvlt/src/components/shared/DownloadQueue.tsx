@@ -15,7 +15,7 @@ export function DownloadQueue() {
   const displayJobs = [...activeJobs, ...recentJobs];
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm flex flex-col gap-2">
+    <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm flex flex-col gap-2 px-4 md:px-0">
       {displayJobs.map(job => {
         const isError = job.status === "error" || job.status === "failed";
         const isDone = job.status === "completed";
@@ -23,64 +23,68 @@ export function DownloadQueue() {
 
         return (
           <div key={job.jobId} className={cn(
-            "bg-card border rounded-lg shadow-lg p-3 flex flex-col gap-2 animate-in slide-in-from-bottom-4 fade-in-50",
-            isActive && "border-primary/50 shadow-primary/10",
-            isError && "border-destructive/50"
+            "bg-card rounded-[32px] p-4 flex flex-col gap-3 animate-in slide-in-from-bottom-4 fade-in-50 card-shadow",
+            isActive && "shadow-primary/10",
+            isError && "border border-destructive/50"
           )}>
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2 overflow-hidden">
-                <div className={cn("w-8 h-8 rounded flex items-center justify-center shrink-0", 
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className={cn("w-16 h-16 rounded-[20px] flex items-center justify-center shrink-0 overflow-hidden relative", 
                   isActive ? "bg-primary/10 text-primary" : 
                   isError ? "bg-destructive/10 text-destructive" : 
                   "bg-green-500/10 text-green-600"
                 )}>
-                  {isActive ? <Loader2 className="w-4 h-4 animate-spin" /> : 
-                   isError ? <AlertCircle className="w-4 h-4" /> : 
-                   <FileCheck2 className="w-4 h-4" />}
+                   {/* We don't have the thumbnail in the job object currently, but if we did, we could show it here. Let's show the icon for now. */}
+                  {isActive ? <Loader2 className="w-6 h-6 animate-spin" /> : 
+                   isError ? <AlertCircle className="w-6 h-6" /> : 
+                   <FileCheck2 className="w-6 h-6" />}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-semibold truncate">{job.label || "Media"}</span>
-                  <span className="text-xs text-muted-foreground truncate">{job.stage || job.status}</span>
+                  <span className="text-sm font-semibold truncate text-foreground">{job.label || "Media"}</span>
+                  <span className="text-xs text-muted-foreground truncate mt-0.5">{job.stage || job.status}</span>
+                  {isActive && (
+                    <span className="text-xs font-semibold mt-1">
+                      Total 100% - Remaining {100 - (job.percent || 0)}%
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 mt-2">
                 {isActive && (
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => cancelJob(job.jobId)}>
-                    <X className="w-3 h-3" />
-                  </Button>
+                  <button className="text-sm font-semibold text-info hover:underline bg-transparent border-none p-0 cursor-pointer" onClick={() => cancelJob(job.jobId)}>
+                    Cancel
+                  </button>
                 )}
                 {isError && (
                   <>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => retryJob(job.jobId)}>
-                      <RefreshCcw className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => cancelJob(job.jobId)}>
-                      <X className="w-3 h-3" />
-                    </Button>
+                    <button className="text-sm font-semibold text-info hover:underline bg-transparent border-none p-0 cursor-pointer mr-3" onClick={() => retryJob(job.jobId)}>
+                      Retry
+                    </button>
+                    <button className="text-sm font-semibold text-muted-foreground hover:underline bg-transparent border-none p-0 cursor-pointer" onClick={() => cancelJob(job.jobId)}>
+                      Dismiss
+                    </button>
                   </>
                 )}
                 {isDone && (
                   <>
-                    <Button variant="default" size="sm" className="h-6 px-2 text-xs" asChild>
-                      <a href={job.downloadUrl || getFileUrl(job.jobId)} download>
-                        <Download className="w-3 h-3 mr-1" /> Save
-                      </a>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => cancelJob(job.jobId)}>
-                      <X className="w-3 h-3" />
-                    </Button>
+                    <a href={job.downloadUrl || getFileUrl(job.jobId)} download className="text-sm font-semibold text-info hover:underline mr-3">
+                      Save
+                    </a>
+                    <button className="text-sm font-semibold text-muted-foreground hover:underline bg-transparent border-none p-0 cursor-pointer" onClick={() => cancelJob(job.jobId)}>
+                      Dismiss
+                    </button>
                   </>
                 )}
               </div>
             </div>
             
             {isActive && (
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-                  <span>{job.percent > 0 ? `${job.percent.toFixed(1)}%` : ""}</span>
-                  <span>{job.speed ? `${job.speed}/s` : ""} {job.eta ? `• ETA: ${job.eta}` : ""}</span>
+              <div className="space-y-2 mt-1">
+                <Progress value={job.percent > 0 ? job.percent : undefined} className="h-2 rounded-full bg-secondary [&>div]:bg-progress" />
+                <div className="flex items-center justify-between text-xs font-semibold text-info">
+                  <span>{job.speed ? `${job.speed}/s` : ""}</span>
+                  <span>{job.eta ? `${job.eta} left` : ""}</span>
                 </div>
-                <Progress value={job.percent > 0 ? job.percent : undefined} className="h-1.5" />
               </div>
             )}
             {isError && job.error && (
