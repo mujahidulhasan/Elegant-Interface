@@ -1,0 +1,1 @@
+- [Clipvlt external download backend](clipvlt-backend.md) — Clipvlt calls an external yt-dlp FastAPI service directly; no OpenAPI/codegen, client is hand-written.

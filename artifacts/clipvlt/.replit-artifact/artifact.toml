@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Clipvlt"
+version = "1.0.0"
+id = "artifacts/clipvlt"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18947
+
+[services.development]
+run = "pnpm --filter @workspace/clipvlt run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/clipvlt", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/clipvlt/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18947"
+BASE_PATH = "/"
