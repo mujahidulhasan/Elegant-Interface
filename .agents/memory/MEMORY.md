@@ -1,1 +1,2 @@
 - [Clipvlt external download backend](clipvlt-backend.md) — Clipvlt calls an external yt-dlp FastAPI service directly; no OpenAPI/codegen, client is hand-written.
+- [Clipvlt Phase 2 architecture decisions](clipvlt-phase2-arch.md) — Merged pages, removed fake features, inline download UX, dynamic siteConfig, NSFW gate decisions.

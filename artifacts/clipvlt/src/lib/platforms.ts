@@ -1,5 +1,5 @@
 // Client-side platform detection from a pasted URL. Cosmetic only (icon + accent
-// color) -- the backend does its own platform resolution when extracting metadata.
+// color) — the backend does its own platform resolution when extracting metadata.
 
 export interface PlatformDef {
   id: string;
@@ -10,6 +10,7 @@ export interface PlatformDef {
 }
 
 export const PLATFORMS: PlatformDef[] = [
+  { id: "youtube", label: "YouTube", icon: "fa-brands fa-youtube", accent: "#FF0000", hosts: ["youtube.com", "youtu.be"] },
   { id: "facebook", label: "Facebook", icon: "fa-brands fa-facebook", accent: "#1877F2", hosts: ["facebook.com", "fb.watch"] },
   { id: "instagram", label: "Instagram", icon: "fa-brands fa-instagram", accent: "#E1306C", hosts: ["instagram.com"] },
   { id: "tiktok", label: "TikTok", icon: "fa-brands fa-tiktok", accent: "#25F4EE", hosts: ["tiktok.com"] },
@@ -55,6 +56,27 @@ export function isLikelyUrl(value: string): boolean {
   try {
     const u = new URL(value.trim());
     return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+// Known adult-content hostnames (client-side heuristic gate — backend provides no NSFW flag).
+// This list covers well-known adult video/content platforms. NSFW detection is cosmetic/UX only:
+// the actual content is still fetched from the real backend when the user accepts.
+const ADULT_HOSTS = new Set([
+  "pornhub.com", "xvideos.com", "xhamster.com", "xnxx.com", "redtube.com",
+  "youporn.com", "tube8.com", "spankbang.com", "beeg.com", "eporner.com",
+  "hclips.com", "tnaflix.com", "pornhd.com", "brazzers.com", "onlyfans.com",
+  "faphouse.com", "extremetube.com", "thumbzilla.com", "txxx.com", "sunporno.com",
+  "drtuber.com", "gotporn.com", "cliphunter.com", "slutload.com", "fuqer.com",
+  "4tube.com", "porntrex.com", "hdzog.com", "vjav.com", "javhd.com",
+]);
+
+export function isAdultUrl(rawUrl: string): boolean {
+  try {
+    const host = new URL(rawUrl).hostname.toLowerCase().replace(/^www\./, "");
+    return ADULT_HOSTS.has(host) || Array.from(ADULT_HOSTS).some((h) => host.endsWith(`.${h}`));
   } catch {
     return false;
   }
