@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
 import {
   extractMetadata,
   type ExtractResponse,
@@ -13,7 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHistory } from "@/hooks/useHistory";
 import { detectPlatform, isAdultUrl } from "@/lib/platforms";
 import { Link } from "wouter";
-import { Eye, EyeOff, Calendar, User, PlayCircle, Image as ImageIcon, Music, Video, Clock, ExternalLink } from "lucide-react";
+import {
+  Eye, EyeOff, Calendar, User, PlayCircle,
+  Image as ImageIcon, Music, Video, Clock, ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -58,7 +60,7 @@ function NsfwGate({ onContinue, onLeave }: { onContinue: () => void; onLeave: ()
   );
 }
 
-// ─── Helper: format view count ────────────────────────────
+// ─── Formatting helpers ───────────────────────────────────
 
 function fmtViews(n: number | null | undefined): string {
   if (!n) return "";
@@ -67,25 +69,46 @@ function fmtViews(n: number | null | undefined): string {
   return `${n} views`;
 }
 
+/** Safely format a duration in seconds to HH:MM:SS or MM:SS. Handles floats. */
 function fmtDuration(secs: number | null | undefined): string {
-  if (!secs) return "";
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  return `${m}:${String(s).padStart(2, "0")}`;
+  if (secs == null || secs <= 0) return "";
+  const total = Math.floor(secs); // floor floats like 44.327 → 44
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/** Format a YYYYMMDD upload date string to human-readable "Jan 1, 2024". */
+function fmtUploadDate(date: string | null | undefined): string {
+  if (!date) return "";
+  if (/^\d{8}$/.test(date)) {
+    const y = parseInt(date.slice(0, 4), 10);
+    const m = parseInt(date.slice(4, 6), 10) - 1;
+    const d = parseInt(date.slice(6, 8), 10);
+    try {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(new Date(y, m, d));
+    } catch {
+      return date;
+    }
+  }
+  return date;
 }
 
 // ─── Main Downloader page ─────────────────────────────────
 
 export function Downloader() {
-  const [location] = useLocation();
-
-  // Parse ?url= from query string
+  // Parse ?url= from query string without causing a re-render on every navigation
   const getUrlParam = () => {
-    const search = window.location.search;
     try {
-      return new URLSearchParams(search).get("url") ?? "";
+      return new URLSearchParams(window.location.search).get("url") ?? "";
     } catch {
       return "";
     }
@@ -119,15 +142,11 @@ export function Downloader() {
       setData(res);
       setStatus("success");
 
-      // Check adult content gate
+      // Adult content gate
       const accepted = localStorage.getItem(NSFW_KEY) === "true";
-      if (isAdultUrl(url) && !accepted) {
-        setNsfwGated(true);
-      } else {
-        setNsfwGated(false);
-      }
+      setNsfwGated(isAdultUrl(url) && !accepted);
 
-      // Auto-select best video format as default
+      // Auto-select best video format
       const videoFormats = res.formats.filter((f) => f.has_video);
       if (videoFormats.length > 0) {
         const best = videoFormats.reduce((a, b) =>
@@ -141,7 +160,7 @@ export function Downloader() {
     }
   };
 
-  // Auto-extract if URL is in query string on mount
+  // Auto-extract when ?url= is present on mount
   useEffect(() => {
     const param = getUrlParam();
     if (param && status === "idle") {
@@ -154,18 +173,13 @@ export function Downloader() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as "video" | "audio" | "thumbnail");
     setSelectedFormat(null);
-    // Auto-select best for the new tab
     if (data) {
       if (tab === "video") {
         const vf = data.formats.filter((f) => f.has_video);
-        if (vf.length) {
-          setSelectedFormat(vf[0]);
-        }
+        if (vf.length) setSelectedFormat(vf[0]);
       } else if (tab === "audio") {
         const af = data.formats.filter((f) => f.has_audio && !f.has_video);
-        if (af.length) {
-          setSelectedFormat(af[0]);
-        }
+        if (af.length) setSelectedFormat(af[0]);
       }
     }
   };
@@ -179,19 +193,18 @@ export function Downloader() {
       url: extractedUrl.current,
       platformId: platform?.id ?? "generic",
       metadata: {
-        title: data.metadata.title ?? null,
+        title:     data.metadata.title     ?? null,
         thumbnail: data.metadata.thumbnail ?? null,
-        uploader: data.metadata.uploader ?? null,
-        duration: data.metadata.duration ?? null,
+        uploader:  data.metadata.uploader  ?? null,
+        duration:  data.metadata.duration  ?? null,
       },
-      kind: activeTab === "thumbnail" ? "thumbnail" : activeTab,
-      resolution: selectedFormat?.resolution ?? null,
+      kind:        activeTab === "thumbnail" ? "thumbnail" : activeTab,
+      resolution:  selectedFormat?.resolution ?? null,
       downloadUrl: null,
-      createdAt: Date.now(),
+      createdAt:   Date.now(),
     });
   };
 
-  // Build download spec for current selection
   const getDownloadSpec = () => {
     const url = extractedUrl.current;
     if (activeTab === "thumbnail") {
@@ -226,7 +239,6 @@ export function Downloader() {
   const meta = data?.metadata;
   const recentEntries = entries.slice(0, 3);
 
-  // Video/audio format counts
   const videoFormats = data ? data.formats.filter((f) => f.has_video) : [];
   const audioFormats = data ? data.formats.filter((f) => f.has_audio && !f.has_video) : [];
   const hasThumbnail = !!meta?.thumbnail;
@@ -242,10 +254,10 @@ export function Downloader() {
         statusText="Analyzing…"
       />
 
-      {/* Loading */}
+      {/* Loading skeleton */}
       {status === "extracting" && <SkeletonCard />}
 
-      {/* Error */}
+      {/* Error state */}
       {status === "error" && (
         <ErrorState error={error} onRetry={() => handleExtract()} />
       )}
@@ -268,7 +280,7 @@ export function Downloader() {
           {/* Blurred wrapper when NSFW gated */}
           <div className={cn("space-y-5", nsfwGated && "nsfw-blurred")}>
 
-            {/* ── 1. Thumbnail ───────────────────────────────────── */}
+            {/* ── 1. Thumbnail ─────────────────────────────────── */}
             {hasThumbnail && !thumbnailError && (
               <div className="relative w-full rounded-[18px] overflow-hidden bg-black/10 aspect-video max-h-[340px]">
                 <div
@@ -279,9 +291,10 @@ export function Downloader() {
                   src={meta!.thumbnail!}
                   alt={meta!.title ?? "Thumbnail"}
                   className="relative w-full h-full object-contain"
+                  loading="lazy"
                   onError={() => setThumbnailError(true)}
                 />
-                {meta!.duration && (
+                {meta!.duration != null && meta!.duration > 0 && (
                   <div className="absolute bottom-2 right-2 bg-black/75 text-white text-xs font-mono px-2 py-0.5 rounded-[6px] backdrop-blur-sm">
                     {fmtDuration(meta!.duration)}
                   </div>
@@ -289,9 +302,8 @@ export function Downloader() {
               </div>
             )}
 
-            {/* ── 2. Metadata ─────────────────────────────────────── */}
+            {/* ── 2. Metadata ──────────────────────────────────── */}
             <div className="bg-card rounded-[18px] p-5 card-shadow space-y-3">
-              {/* Platform badge */}
               {platform && platform.id !== "generic" && (
                 <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary">
                   <i className={platform.icon} style={{ color: platform.accent }} />
@@ -303,7 +315,7 @@ export function Downloader() {
                 {meta!.title || extractedUrl.current}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
                 {meta!.uploader && (
                   <span className="flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5" /> {meta!.uploader}
@@ -316,7 +328,7 @@ export function Downloader() {
                 )}
                 {meta!.upload_date && (
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> {meta!.upload_date}
+                    <Calendar className="w-3.5 h-3.5" /> {fmtUploadDate(meta!.upload_date)}
                   </span>
                 )}
                 {meta!.webpage_url && (
@@ -332,12 +344,8 @@ export function Downloader() {
               </div>
             </div>
 
-            {/* ── 3. Mode tabs ────────────────────────────────────── */}
-            <Tabs
-              value={activeTab}
-              onValueChange={handleTabChange}
-              className="space-y-4"
-            >
+            {/* ── 3. Mode tabs ─────────────────────────────────── */}
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
               <TabsList className="w-full rounded-[16px] h-11 bg-secondary p-1">
                 <TabsTrigger
                   value="video"
@@ -368,7 +376,7 @@ export function Downloader() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* ── 4. Formats + Download ───────────────────────── */}
+              {/* ── 4. Formats + Download ──────────────────────── */}
               <TabsContent value="video" className="space-y-4 mt-0">
                 {videoFormats.length > 0 ? (
                   <FormatSelector
@@ -399,7 +407,7 @@ export function Downloader() {
                   />
                 ) : (
                   <p className="text-center text-sm text-muted-foreground py-6">
-                    No audio-only formats available. Use Video tab to download with audio.
+                    No audio-only formats available. Use the Video tab to download with audio included.
                   </p>
                 )}
                 <DownloadAction
@@ -416,6 +424,7 @@ export function Downloader() {
                       src={meta!.thumbnail!}
                       alt="Thumbnail"
                       className="w-full object-cover max-h-[400px]"
+                      loading="lazy"
                     />
                   </div>
                 ) : (
@@ -455,7 +464,7 @@ export function Downloader() {
                   <div className="rounded-[12px] bg-secondary/50 p-3 flex items-center gap-3 hover:bg-secondary transition-colors cursor-pointer">
                     <div className="w-10 h-10 rounded-[10px] bg-muted overflow-hidden shrink-0">
                       {entry.metadata.thumbnail ? (
-                        <img src={entry.metadata.thumbnail} alt="" className="w-full h-full object-cover" />
+                        <img src={entry.metadata.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <i className={p?.icon} style={{ color: p?.accent }} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { UrlInput } from "@/components/shared/UrlInput";
 import { siteConfig } from "@/lib/siteConfig";
 import { useHistory } from "@/hooks/useHistory";
@@ -10,14 +10,21 @@ import { formatDistanceToNow } from "date-fns";
 
 export function Home() {
   const [url, setUrl] = useState("");
+  const [, navigate] = useLocation();
   const { entries } = useHistory();
   const recent = entries.slice(0, 3);
 
+  // Client-side SPA navigation — no full page reload
   const handleExtract = () => {
     if (url.trim()) {
-      window.location.href = `/download?url=${encodeURIComponent(url.trim())}`;
+      navigate(`/download?url=${encodeURIComponent(url.trim())}`);
     }
   };
+
+  // Split hero title: highlight the last word with primary color
+  const heroWords = siteConfig.heroTitle.trim().split(/\s+/);
+  const heroHighlight = heroWords.pop() ?? "";
+  const heroRest = heroWords.join(" ");
 
   return (
     <div className="flex flex-col gap-10 pb-16">
@@ -25,11 +32,11 @@ export function Home() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="text-center space-y-6 pt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <h1 className="text-[40px] leading-[1.1] md:text-6xl font-bold tracking-tight text-balance text-foreground">
-          Download media from{" "}
-          <span className="text-primary">anywhere.</span>
+          {heroRest}{" "}
+          <span className="text-primary">{heroHighlight}</span>
         </h1>
         <p className="text-base text-muted-foreground max-w-2xl mx-auto text-balance">
-          {siteConfig.tagline}. High quality, no watermarks, completely free.
+          {siteConfig.heroSubtitle}
         </p>
         <div className="max-w-xl mx-auto w-full pt-2">
           <UrlInput
@@ -52,7 +59,7 @@ export function Home() {
           {/* Fade edges */}
           <div className="absolute inset-y-0 left-0 w-14 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
           <div className="absolute inset-y-0 right-0 w-14 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-          {/* Marquee track — duplicated 2x so translateX(-50%) creates seamless loop */}
+          {/* Marquee track — duplicated 2× for seamless infinite loop */}
           <div className="marquee-track">
             {[...PLATFORMS, ...PLATFORMS].map((p, i) => (
               <div
@@ -89,7 +96,7 @@ export function Home() {
                   <div className="rounded-[14px] bg-secondary/50 p-3 flex items-center gap-3 hover:bg-secondary transition-colors cursor-pointer group">
                     <div className="w-[42px] h-[42px] rounded-[10px] bg-muted overflow-hidden shrink-0">
                       {entry.metadata.thumbnail ? (
-                        <img src={entry.metadata.thumbnail} alt="" className="w-full h-full object-cover" />
+                        <img src={entry.metadata.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-card">
                           <i className={platform?.icon} style={{ color: platform?.accent }} />
@@ -116,7 +123,7 @@ export function Home() {
       )}
 
       {/* ── Feature cards ────────────────────────────────────── */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 max-w-4xl mx-auto">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 max-w-4xl mx-auto w-full">
         <Card className="bg-card rounded-[18px] border-none card-shadow">
           <CardContent className="p-6 space-y-3">
             <div className="w-11 h-11 rounded-[12px] bg-primary/10 text-primary flex items-center justify-center mb-2">
@@ -159,7 +166,7 @@ export function Home() {
           {[
             {
               q: "Is this tool free?",
-              a: "Yes, Clipvlt is completely free to use with no limits on downloads.",
+              a: `Yes, ${siteConfig.siteName} is completely free to use with no limits on downloads.`,
             },
             {
               q: "What platforms are supported?",

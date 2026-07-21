@@ -4,7 +4,7 @@ import { getFileUrl, type DownloadKind, type AudioFormat } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Download, AlertCircle, RefreshCcw, CheckCircle } from "lucide-react";
+import { Loader2, Download, RefreshCcw, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface DownloadSpec {
@@ -36,7 +36,7 @@ export function DownloadAction({
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const autoDownloadedRef = useRef<Set<string>>(new Set());
 
-  // Reset when the spec changes (user picks a different format)
+  // Reset when the download spec changes (user picked a different format)
   const specKey = `${url}|${kind}|${formatId ?? ""}`;
   const prevSpecKey = useRef(specKey);
   useEffect(() => {
@@ -52,10 +52,7 @@ export function DownloadAction({
   useEffect(() => {
     if (!activeJob) return;
 
-    if (
-      activeJob.status === "completed" &&
-      !autoDownloadedRef.current.has(activeJob.jobId)
-    ) {
+    if (activeJob.status === "completed" && !autoDownloadedRef.current.has(activeJob.jobId)) {
       autoDownloadedRef.current.add(activeJob.jobId);
       const fileUrl = activeJob.downloadUrl || getFileUrl(activeJob.jobId);
       const a = document.createElement("a");
@@ -65,7 +62,7 @@ export function DownloadAction({
       document.body.appendChild(a);
       a.click();
       setTimeout(() => document.body.removeChild(a), 200);
-      toast({ title: "Download completed", description: label });
+      toast({ title: "Download complete", description: label });
       onComplete?.();
     }
 
@@ -95,14 +92,12 @@ export function DownloadAction({
     setActiveJobId(null);
   };
 
-  const isIdle = !activeJob;
+  const isIdle      = !activeJob;
   const isPreparing = activeJob?.status === "queued";
-  const isRunning =
-    activeJob?.status === "running" || activeJob?.status === "merging";
+  const isRunning   = activeJob?.status === "running" || activeJob?.status === "merging";
   const isCompleted = activeJob?.status === "completed";
-  const isFailed =
-    activeJob?.status === "failed" || activeJob?.status === "error";
-  const percent = activeJob?.percent ?? 0;
+  const isFailed    = activeJob?.status === "failed" || activeJob?.status === "error";
+  const percent     = activeJob?.percent ?? 0;
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -116,30 +111,21 @@ export function DownloadAction({
         )}
       >
         {isPreparing && (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" /> Preparing…
-          </>
+          <><Loader2 className="w-5 h-5 animate-spin" /> Preparing…</>
         )}
         {isRunning && (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
+          <><Loader2 className="w-5 h-5 animate-spin" />
             {percent > 0 ? `Downloading ${percent}%` : "Downloading…"}
           </>
         )}
         {isCompleted && (
-          <>
-            <CheckCircle className="w-5 h-5" /> Saved to Downloads
-          </>
+          <><CheckCircle className="w-5 h-5" /> Saved to Downloads</>
         )}
         {isFailed && (
-          <>
-            <RefreshCcw className="w-5 h-5" /> Retry Download
-          </>
+          <><RefreshCcw className="w-5 h-5" /> Retry Download</>
         )}
         {isIdle && (
-          <>
-            <Download className="w-5 h-5" /> Download
-          </>
+          <><Download className="w-5 h-5" /> Download</>
         )}
       </Button>
 
@@ -151,11 +137,7 @@ export function DownloadAction({
           />
           <div className="flex justify-between text-[11px] text-muted-foreground">
             <span>{activeJob?.speed ? `${activeJob.speed}/s` : ""}</span>
-            <span>
-              {activeJob?.eta
-                ? `${activeJob.eta} left`
-                : activeJob?.stage || ""}
-            </span>
+            <span>{activeJob?.eta ? `${activeJob.eta} left` : activeJob?.stage || ""}</span>
           </div>
         </div>
       )}
