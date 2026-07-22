@@ -1,7 +1,7 @@
 {
   "framework": "vite",
-  "buildCommand": "cd artifacts/clipvlt && BASE_PATH=/ pnpm build",
-  "outputDirectory": "artifacts/clipvlt/dist",
+  "buildCommand": "BASE_PATH=/ pnpm build",
+  "outputDirectory": "dist",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "routes": [
     { "src": "/(.*)", "dest": "/index.html" }
