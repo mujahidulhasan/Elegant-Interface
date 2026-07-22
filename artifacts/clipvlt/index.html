@@ -30,6 +30,16 @@
       } catch(e){}
     </script>
   </head>
+  <script>
+  window.addEventListener('error', function(e) {
+    var root = document.getElementById('root');
+    if (root) {
+      root.innerHTML = '<div style="padding:40px;font-family:sans-serif;background:#1a1a1a;color:#fff;min-height:100vh"><h1 style="color:#ef4444">Runtime Error</h1><pre style="background:#000;padding:20px;border-radius:12px;overflow:auto;font-size:13px;line-height:1.6;white-space:pre-wrap">' + 
+        (e.message || 'Unknown') + '\n\n' + (e.error?.stack || '') + 
+        '</pre></div>';
+    }
+  });
+  </script>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
