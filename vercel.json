@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "cd artifacts/clipvlt && npm install && npx vite build --config vite.config.ts",
+  "buildCommand": "cd artifacts/clipvlt && pnpm install && pnpm build",
   "outputDirectory": "artifacts/clipvlt/dist",
-  "installCommand": "npm install --prefix artifacts/clipvlt",
+  "installCommand": "pnpm install --filter @workspace/clipvlt",
   "routes": [
     {
       "src": "/(.*)",
