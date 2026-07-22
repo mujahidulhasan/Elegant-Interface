@@ -3,13 +3,13 @@
 // Drop logo.png, favicon.png, bg.mp4, and developer.png next to this file to enable custom assets.
 window.__SITE_SETTINGS__ = {
   // ── Identity ──────────────────────────────────────────────
-  siteName:     "Clipvlt",
-  shortName:    "CV",
+  siteName:     "Saveclp",
+  shortName:    "Sc",
   tagline:      "Download media from anywhere",
   heroTitle:    "Download media from anywhere.",
   heroSubtitle: "High quality, no watermarks, completely free.",
-  description:  "Clipvlt lets you download video, audio, and thumbnails from dozens of platforms — fast, clean, and free.",
-  websiteUrl:   "https://clipvlt.app",
+  description:  "Saveclp lets you download video, audio, and thumbnails from dozens of platforms — fast, clean, and free.",
+  websiteUrl:   "https://saveclp.vercel.app",
 
   // ── Branding ──────────────────────────────────────────────
   // logoMode: "logo+text" | "logo-only" | "text-only"
