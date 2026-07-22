@@ -13,7 +13,7 @@ window.__SITE_SETTINGS__ = {
 
   // ── Branding ──────────────────────────────────────────────
   // logoMode: "logo+text" | "logo-only" | "text-only"
-  logoMode:     "logo+text",
+  logoMode:     "logo-only",
   logo:         "/site/logo.png",
   favicon:      "/site/favicon.png",
 
@@ -31,7 +31,7 @@ window.__SITE_SETTINGS__ = {
   defaultTheme: "system",
 
   // ── Footer ────────────────────────────────────────────────
-  copyright:    "© 2025 Clipvlt",
+  copyright:    "© 2025 Saveclp",
   footerText:   "For personal use only. Respect copyright laws.",
   supportEmail: "support@clipvlt.app",
   contactEmail: "contact@clipvlt.app",
@@ -50,9 +50,9 @@ window.__SITE_SETTINGS__ = {
     bulk:           true,   // bulk downloader page
     nsfw:           true,   // adult content gate
     settings:       true,   // user settings page
-    developer:      false,  // developer info page (set developer.json too)
+    developer:      true,  // developer info page (set developer.json too)
     toast:          true,   // in-app toast notifications
     animations:     true,   // ambient animations (aurora, particles)
-    adultPlatforms: false   // show adult platforms slider on home page
+    adultPlatforms: true   // show adult platforms slider on home page
   }
 };
