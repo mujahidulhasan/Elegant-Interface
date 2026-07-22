@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
+  "buildCommand": "cd artifacts/clipvlt && npm install && npm run build",
+  "outputDirectory": "artifacts/clipvlt/dist",
+  "installCommand": "cd artifacts/clipvlt && npm install",
   "routes": [
     {
       "src": "/(.*)",
