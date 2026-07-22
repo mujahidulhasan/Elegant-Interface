@@ -1,12 +1,16 @@
 {
   "framework": "vite",
-  "buildCommand": "cd artifacts/clipvlt && npm install && npm run build",
+  "buildCommand": "cd artifacts/clipvlt && npm install && npx vite build --config vite.config.ts",
   "outputDirectory": "artifacts/clipvlt/dist",
-  "installCommand": "cd artifacts/clipvlt && npm install",
+  "installCommand": "npm install --prefix artifacts/clipvlt",
   "routes": [
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "PORT": "3000",
+    "BASE_PATH": "/"
+  }
 }
