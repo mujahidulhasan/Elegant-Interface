@@ -21,6 +21,19 @@ interface DownloadActionProps extends DownloadSpec {
   onComplete?: () => void;
 }
 
+async function downloadBlob(fileUrl: string, filename: string) {
+  const response = await fetch(fileUrl);
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = filename || "download";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+}
+
 export function DownloadAction({
   url,
   kind,
@@ -54,11 +67,9 @@ export function DownloadAction({
     if (activeJob.status === "completed" && !autoDownloadedRef.current.has(activeJob.jobId)) {
       autoDownloadedRef.current.add(activeJob.jobId);
       const fileUrl = activeJob.downloadUrl || getFileUrl(activeJob.jobId);
+      const filename = activeJob.filename || label || "download";
       
-      // Cross-origin files: use window.open to trigger download
-      // The backend sets Content-Disposition header which forces download
-      window.open(fileUrl, "_blank");
-      
+      downloadBlob(fileUrl, filename);
       toast({ title: "Download complete", description: label });
       onComplete?.();
     }
