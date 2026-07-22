@@ -13,7 +13,7 @@ export interface QueueJob {
   url: string;
   kind: DownloadKind;
   formatId: string | null;
-  label: string; // human readable format label for display, e.g. "1080p MP4"
+  label: string;
   status: JobStatus | "error";
   stage: string;
   percent: number;
@@ -25,11 +25,8 @@ export interface QueueJob {
 }
 
 const POLL_INTERVAL_MS = 1500;
+const API_BASE = "https://ohyah-ytback.hf.space";
 
-/**
- * Manages the client-side download queue: submits jobs to the backend and
- * polls /api/progress/{job_id} until each job settles (completed/failed).
- */
 export function useDownloadQueue() {
   const [jobs, setJobs] = useState<QueueJob[]>([]);
   const timers = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
@@ -57,7 +54,9 @@ export function useDownloadQueue() {
             speed: progress.speed,
             eta: progress.eta,
             filename: progress.filename,
-            downloadUrl: progress.download_url,
+            downloadUrl: progress.download_url?.startsWith('/')
+              ? `${API_BASE}${progress.download_url}`
+              : progress.download_url,
             error: progress.error,
           });
           if (progress.status === "completed" || progress.status === "failed") {
