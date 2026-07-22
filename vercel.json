@@ -3,7 +3,7 @@
   "buildCommand": "BASE_PATH=/ pnpm build",
   "outputDirectory": "dist",
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
