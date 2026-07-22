@@ -36,7 +36,6 @@ export function DownloadAction({
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const autoDownloadedRef = useRef<Set<string>>(new Set());
 
-  // Reset when the download spec changes (user picked a different format)
   const specKey = `${url}|${kind}|${formatId ?? ""}`;
   const prevSpecKey = useRef(specKey);
   useEffect(() => {
@@ -55,13 +54,11 @@ export function DownloadAction({
     if (activeJob.status === "completed" && !autoDownloadedRef.current.has(activeJob.jobId)) {
       autoDownloadedRef.current.add(activeJob.jobId);
       const fileUrl = activeJob.downloadUrl || getFileUrl(activeJob.jobId);
-      const a = document.createElement("a");
-      a.href = fileUrl;
-      a.download = activeJob.filename || label;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => document.body.removeChild(a), 200);
+      
+      // Cross-origin files: use window.open to trigger download
+      // The backend sets Content-Disposition header which forces download
+      window.open(fileUrl, "_blank");
+      
       toast({ title: "Download complete", description: label });
       onComplete?.();
     }
