@@ -349,7 +349,7 @@ export function Downloader() {
 
             {/* ── 3. Mode tabs ─────────────────────────────────── */}
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-              <TabsList className="w-full grid grid-cols-3 rounded-[16px] h-12 bg-secondary/80 p-1 border border-border/50">
+              <TabsList className="w-full grid grid-cols-3 rounded-[16px] h-11 bg-secondary/80 p-1 border border-border/50">
                 <TabsTrigger
                   value="video"
                   className="flex items-center justify-center gap-1.5 rounded-[12px] text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
@@ -357,9 +357,6 @@ export function Downloader() {
                 >
                   <Video className="w-4 h-4 shrink-0" />
                   <span>Video</span>
-                  {videoFormats.length > 0 && (
-                    <span className="text-[10px] text-muted-foreground font-mono">({videoFormats.length})</span>
-                  )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="audio"
@@ -368,9 +365,6 @@ export function Downloader() {
                 >
                   <Music className="w-4 h-4 shrink-0" />
                   <span>Audio</span>
-                  {audioFormats.length > 0 && (
-                    <span className="text-[10px] text-muted-foreground font-mono">({audioFormats.length})</span>
-                  )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="thumbnail"
