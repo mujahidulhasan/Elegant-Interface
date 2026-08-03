@@ -311,11 +311,14 @@ export function Downloader() {
                 </div>
               )}
 
-              <h1 className="font-bold text-lg leading-snug text-balance" title={meta!.title ?? undefined}>
+              <h1
+                className="font-bold text-base sm:text-lg leading-snug text-foreground line-clamp-2 sm:line-clamp-none break-words"
+                title={meta!.title ?? undefined}
+              >
                 {meta!.title || extractedUrl.current}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
                 {meta!.uploader && (
                   <span className="flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5" /> {meta!.uploader}
@@ -346,33 +349,36 @@ export function Downloader() {
 
             {/* ── 3. Mode tabs ─────────────────────────────────── */}
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-              <TabsList className="w-full rounded-[16px] h-11 bg-secondary p-1">
+              <TabsList className="w-full grid grid-cols-3 rounded-[16px] h-12 bg-secondary/80 p-1 border border-border/50">
                 <TabsTrigger
                   value="video"
-                  className="flex-1 rounded-[12px] text-sm gap-1.5 data-[state=active]:shadow-sm"
+                  className="flex items-center justify-center gap-1.5 rounded-[12px] text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
                   disabled={videoFormats.length === 0}
                 >
-                  <Video className="w-4 h-4" /> Video
+                  <Video className="w-4 h-4 shrink-0" />
+                  <span>Video</span>
                   {videoFormats.length > 0 && (
-                    <span className="ml-0.5 text-[10px] text-muted-foreground">({videoFormats.length})</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">({videoFormats.length})</span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="audio"
-                  className="flex-1 rounded-[12px] text-sm gap-1.5 data-[state=active]:shadow-sm"
+                  className="flex items-center justify-center gap-1.5 rounded-[12px] text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
                   disabled={audioFormats.length === 0}
                 >
-                  <Music className="w-4 h-4" /> Audio
+                  <Music className="w-4 h-4 shrink-0" />
+                  <span>Audio</span>
                   {audioFormats.length > 0 && (
-                    <span className="ml-0.5 text-[10px] text-muted-foreground">({audioFormats.length})</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">({audioFormats.length})</span>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="thumbnail"
-                  className="flex-1 rounded-[12px] text-sm gap-1.5 data-[state=active]:shadow-sm"
+                  className="flex items-center justify-center gap-1.5 rounded-[12px] text-xs sm:text-sm font-semibold transition-all data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm"
                   disabled={!hasThumbnail}
                 >
-                  <ImageIcon className="w-4 h-4" /> Thumbnail
+                  <ImageIcon className="w-4 h-4 shrink-0" />
+                  <span>Thumbnail</span>
                 </TabsTrigger>
               </TabsList>
 
