@@ -39,9 +39,20 @@ export function UrlInput({
     }
   };
 
+  const handleSubmit = () => {
+    let cleanVal = value.trim();
+    if (cleanVal && !cleanVal.startsWith("http://") && !cleanVal.startsWith("https://")) {
+      cleanVal = `https://${cleanVal}`;
+      onChange(cleanVal);
+    }
+    if (cleanVal && !isLoading) {
+      onSubmit();
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && isLikelyUrl(value) && !isLoading) {
-      onSubmit();
+      handleSubmit();
     }
   };
 
@@ -93,9 +104,9 @@ export function UrlInput({
 
       {/* Analyze button */}
       <Button
-        onClick={onSubmit}
+        onClick={handleSubmit}
         disabled={!valid || isLoading}
-        className="w-full h-[51px] rounded-[16px] font-semibold text-base transition-all bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="w-full h-[51px] rounded-[16px] font-semibold text-base transition-all bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
       >
         {isLoading ? (
           <span className="flex items-center gap-2">
