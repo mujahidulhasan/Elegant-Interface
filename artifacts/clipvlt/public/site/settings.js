@@ -33,8 +33,8 @@ window.__SITE_SETTINGS__ = {
   // ── Footer ────────────────────────────────────────────────
   copyright:    "© 2025 Saveclp",
   footerText:   "For personal use only. Respect copyright laws.",
-  supportEmail: "support@clipvlt.app",
-  contactEmail: "contact@clipvlt.app",
+  supportEmail: "freefireindunashia@gmail.com",
+  contactEmail: "freefireindunashia2@gmail.com",
 
   // ── Social links (empty string = hidden) ──────────────────
   socials: {
