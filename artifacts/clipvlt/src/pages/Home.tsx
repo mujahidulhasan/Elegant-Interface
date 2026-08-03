@@ -10,23 +10,13 @@ import {
   FastForward,
   Download,
   Shield,
-  Sparkles,
   Zap,
   CheckCircle2,
   FileVideo,
   Music2,
-  Lock,
-  Layers,
   ArrowRight,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-
-const SAMPLE_URLS = [
-  { label: "YouTube Video", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", icon: "fa-brands fa-youtube", color: "#FF0000" },
-  { label: "TikTok Reel", url: "https://www.tiktok.com/@tiktok/video/71234567890", icon: "fa-brands fa-tiktok", color: "#00F2FE" },
-  { label: "Instagram Post", url: "https://www.instagram.com/p/C1234567890/", icon: "fa-brands fa-instagram", color: "#E4405F" },
-  { label: "Twitter / X", url: "https://x.com/twitter/status/1234567890", icon: "fa-brands fa-x-twitter", color: "#1DA1F2" },
-];
 
 export function Home() {
   const [url, setUrl] = useState("");
@@ -36,8 +26,11 @@ export function Home() {
 
   // Client-side SPA navigation
   const handleExtract = (targetUrl?: string) => {
-    const finalUrl = (targetUrl || url).trim();
+    let finalUrl = (targetUrl || url).trim();
     if (finalUrl) {
+      if (!finalUrl.startsWith("http://") && !finalUrl.startsWith("https://")) {
+        finalUrl = `https://${finalUrl}`;
+      }
       navigate(`/download?url=${encodeURIComponent(finalUrl)}`);
     }
   };
@@ -48,26 +41,20 @@ export function Home() {
   const heroRest = heroWords.join(" ");
 
   return (
-    <div className="flex flex-col gap-12 sm:gap-16 pb-20 relative overflow-hidden">
+    <div className="flex flex-col gap-10 sm:gap-14 pb-20 relative overflow-hidden">
       {/* ── Background Decoration ─────────────────────────────── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] pointer-events-none z-0">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] pointer-events-none z-0">
         <div className="absolute top-4 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-primary/15 rounded-full blur-3xl opacity-70 animate-pulse" />
-        <div className="absolute top-20 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-rose-500/10 rounded-full blur-3xl opacity-60" />
+        <div className="absolute top-20 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-primary/10 rounded-full blur-3xl opacity-60" />
       </div>
 
       {/* ── Hero Section ─────────────────────────────────────── */}
       <section className="relative z-10 text-center space-y-6 pt-6 sm:pt-10 px-2 sm:px-0 max-w-4xl mx-auto w-full flex flex-col items-center">
-        {/* Top Feature Pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-secondary/80 border border-border/60 text-xs font-semibold text-foreground shadow-xs animate-in fade-in slide-in-from-bottom-2">
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
-          <span>Fast, Free & High Quality Media Downloader</span>
-        </div>
-
         {/* Headline */}
         <div className="space-y-3">
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground text-balance max-w-2xl mx-auto leading-tight sm:leading-tight">
             {heroRest}{" "}
-            <span className="text-primary bg-gradient-to-r from-primary via-rose-500 to-amber-500 bg-clip-text text-transparent">
+            <span className="text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               {heroHighlight}
             </span>
           </h1>
@@ -78,45 +65,30 @@ export function Home() {
 
         {/* Search Box - Centered Prominently */}
         <div className="w-full max-w-xl mx-auto pt-2">
-          <div className="bg-card/90 backdrop-blur-xl p-4 sm:p-6 rounded-[24px] border border-border/80 card-shadow space-y-4 text-left relative group hover:border-primary/40 transition-colors">
+          <div className="bg-card/90 backdrop-blur-xl p-4 sm:p-5 rounded-[24px] border border-border/80 card-shadow space-y-4 text-left relative group hover:border-primary/40 transition-colors">
             <UrlInput
               value={url}
               onChange={setUrl}
               onSubmit={() => handleExtract()}
               isLoading={false}
-              placeholder="Paste video, audio, or post URL here..."
+              placeholder="Paste any video, audio, or post URL here..."
             />
-
-            {/* Quick Link Chips */}
-            <div className="pt-1 border-t border-border/40 flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-muted-foreground mr-1">Quick Try:</span>
-              {SAMPLE_URLS.map((sample) => (
-                <button
-                  key={sample.label}
-                  onClick={() => {
-                    setUrl(sample.url);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/70 hover:bg-secondary text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <i className={sample.icon} style={{ color: sample.color }} />
-                  {sample.label}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
-        {/* Quick Highlights Row */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-2 text-xs text-muted-foreground font-medium">
-          <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> No Registration
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Zap className="w-4 h-4 text-amber-500 shrink-0" /> High-Speed Downloads
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Shield className="w-4 h-4 text-blue-500 shrink-0" /> Safe & Private
-          </span>
+        {/* Feature Badges - Single Line on Mobile, Matching Website Theme Color */}
+        <div className="w-full max-w-xl mx-auto overflow-x-auto no-scrollbar py-1">
+          <div className="flex flex-row items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-xs font-semibold text-muted-foreground whitespace-nowrap px-1">
+            <span className="flex items-center gap-1.5 shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" /> No Registration
+            </span>
+            <span className="flex items-center gap-1.5 shrink-0">
+              <Zap className="w-3.5 h-3.5 text-primary shrink-0" /> High-Speed Downloads
+            </span>
+            <span className="flex items-center gap-1.5 shrink-0">
+              <Shield className="w-3.5 h-3.5 text-primary shrink-0" /> Safe & Private
+            </span>
+          </div>
         </div>
       </section>
 
@@ -136,7 +108,7 @@ export function Home() {
             <p className="text-xs text-muted-foreground font-medium">Free & Unlimited</p>
           </div>
           <div className="space-y-0.5">
-            <p className="text-xl sm:text-2xl font-extrabold text-emerald-500">0 Ads</p>
+            <p className="text-xl sm:text-2xl font-extrabold text-primary">0 Ads</p>
             <p className="text-xs text-muted-foreground font-medium">Clean Experience</p>
           </div>
         </div>
@@ -283,18 +255,18 @@ export function Home() {
         </Card>
         <Card className="bg-card rounded-[20px] border border-border/60 card-shadow">
           <CardContent className="p-6 space-y-3">
-            <div className="w-11 h-11 rounded-[14px] bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-1">
+            <div className="w-11 h-11 rounded-[14px] bg-primary/10 text-primary flex items-center justify-center mb-1">
               <Download className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-base">Best Quality Streams</h3>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Extract up to 4K 60fps video and 320kbps audio without compression loss.
+              Extract up to 4K 60fps video and high-bitrate audio without compression loss.
             </p>
           </CardContent>
         </Card>
         <Card className="bg-card rounded-[20px] border border-border/60 card-shadow">
           <CardContent className="p-6 space-y-3">
-            <div className="w-11 h-11 rounded-[14px] bg-blue-500/10 text-blue-500 flex items-center justify-center mb-1">
+            <div className="w-11 h-11 rounded-[14px] bg-primary/10 text-primary flex items-center justify-center mb-1">
               <Shield className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-base">Private & Secure</h3>
