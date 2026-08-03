@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ChevronDown, ChevronUp, Star, Sparkles, Film, Music, ShieldCheck } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type FormatInfo } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -8,9 +8,7 @@ import { cn } from "@/lib/utils";
 
 interface Badge {
   label: string;
-  dotClass: string;
   rank: number; // higher = better quality (for sorting)
-  isHighQuality?: boolean;
 }
 
 function parseHeight(resolution: string | null | undefined): number {
@@ -26,18 +24,16 @@ function parseHeight(resolution: string | null | undefined): number {
 
 function getBadge(f: FormatInfo): Badge {
   if (!f.has_video && f.has_audio) {
-    const abr = f.abr ? Math.round(f.abr) : 0;
-    if (abr >= 256) return { label: `HQ Audio (${abr}kbps)`, dotClass: "bg-amber-500", rank: 15, isHighQuality: true };
-    return { label: f.abr ? `${Math.round(f.abr)}kbps Audio` : "Audio Stream", dotClass: "bg-orange-500", rank: 10 };
+    return { label: "Audio", rank: 10 };
   }
   const h = parseHeight(f.resolution);
-  if (h >= 2160) return { label: "4K Ultra HD (2160p)", dotClass: "bg-amber-400", rank: 40, isHighQuality: true };
-  if (h >= 1440) return { label: "2K Quad HD (1440p)", dotClass: "bg-purple-400", rank: 35, isHighQuality: true };
-  if (h >= 1080) return { label: "1080p Full HD", dotClass: "bg-emerald-400", rank: 30, isHighQuality: true };
-  if (h >= 720) return { label: "720p HD", dotClass: "bg-blue-400", rank: 20 };
-  if (h >= 480) return { label: "480p SD", dotClass: "bg-gray-400", rank: 12 };
-  if (h > 0) return { label: `${h}p`, dotClass: "bg-gray-400", rank: 10 };
-  return { label: f.ext?.toUpperCase() || "Media Format", dotClass: "bg-gray-400", rank: 5 };
+  if (h >= 2160) return { label: "4K", rank: 40 };
+  if (h >= 1440) return { label: "2K", rank: 35 };
+  if (h >= 1080) return { label: "FHD", rank: 30 };
+  if (h >= 720) return { label: "HD", rank: 20 };
+  if (h >= 480) return { label: "SD", rank: 12 };
+  if (h > 0) return { label: `${h}p`, rank: 10 };
+  return { label: f.ext?.toUpperCase() || "Media", rank: 5 };
 }
 
 function formatSize(bytes: number | null | undefined): string {
@@ -52,47 +48,36 @@ function bestSize(f: FormatInfo): number {
   return f.filesize ?? f.filesize_approx ?? 0;
 }
 
-// ─── Quality chip component ───────────────────────────────
+// ─── Minimal Quality Badge (Website theme color + shine effect) ──
 
-function QualityChip({ badge, selected }: { badge: Badge; selected?: boolean }) {
-  if (badge.isHighQuality) {
-    return (
-      <span className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold shrink-0 transition-all",
-        selected
-          ? "bg-primary text-primary-foreground shadow-md shadow-primary/30 ring-2 ring-primary/40"
-          : "bg-gradient-to-r from-amber-500/20 via-primary/20 to-rose-500/20 text-primary border border-primary/30 shadow-xs"
-      )}>
-        <Sparkles className="w-3 h-3 text-amber-500 animate-spin-slow shrink-0" />
-        <span>{badge.label}</span>
-      </span>
-    );
-  }
-
+function QualityBadge({ label, selected }: { label: string; selected?: boolean }) {
   return (
-    <span className={cn(
-      "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0 border border-border/40",
-      selected ? "bg-primary/15 text-primary border-primary/30" : "bg-secondary text-foreground"
-    )}>
-      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", badge.dotClass)} />
-      <span>{badge.label}</span>
+    <span
+      className={cn(
+        "relative inline-flex items-center justify-center px-2 py-0.5 rounded-[6px] text-[11px] sm:text-xs font-bold shrink-0 overflow-hidden transition-colors border",
+        selected
+          ? "bg-primary text-primary-foreground border-primary shadow-xs"
+          : "bg-primary/10 text-primary border-primary/30"
+      )}
+    >
+      {/* Clean shine effect animation overlay */}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full animate-[shine_2.5s_infinite]" />
+      <span>{label}</span>
     </span>
   );
 }
 
-// ─── Format row ───────────────────────────────────────────
+// ─── Format row (Strictly 1 line in mobile mode) ─────────
 
 interface FormatRowProps {
   format: FormatInfo;
   badge: Badge;
   isSelected: boolean;
-  isRecommended?: boolean;
   onClick: () => void;
 }
 
-function FormatRow({ format, badge, isSelected, isRecommended, onClick }: FormatRowProps) {
+function FormatRow({ format, badge, isSelected, onClick }: FormatRowProps) {
   const size = bestSize(format);
-  const fps = format.fps && format.fps > 0 ? `${format.fps}fps` : null;
   const res = format.resolution && format.resolution !== "audio only" ? format.resolution : null;
   const abr = format.abr ? `${Math.round(format.abr)}kbps` : null;
   const ext = format.ext ? format.ext.toUpperCase() : "MP4";
@@ -101,49 +86,32 @@ function FormatRow({ format, badge, isSelected, isRecommended, onClick }: Format
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-3.5 rounded-[16px] transition-all text-left relative overflow-hidden group",
+        "w-full flex items-center justify-between gap-2 px-3 sm:px-4 py-3 rounded-[14px] transition-all text-left whitespace-nowrap overflow-hidden group",
         isSelected
-          ? "bg-primary/10 border-2 border-primary shadow-md shadow-primary/10"
-          : badge.isHighQuality
-          ? "bg-card hover:bg-secondary/70 border border-primary/30 shadow-xs"
-          : "bg-secondary/50 hover:bg-secondary border border-border/50"
+          ? "bg-primary/10 border border-primary/40 shadow-xs"
+          : "bg-secondary/50 hover:bg-secondary border border-border/40"
       )}
     >
-      {/* High Quality Glow background highlight */}
-      {badge.isHighQuality && !isSelected && (
-        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none" />
-      )}
-
-      <QualityChip badge={badge} selected={isSelected} />
-
-      <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-        <span className="text-xs sm:text-sm font-semibold text-foreground">
-          {ext} {res ? `· ${res}` : ""}
+      {/* Left side: Badge + Format details in 1 line */}
+      <div className="flex items-center gap-2 min-w-0 truncate">
+        <QualityBadge label={badge.label} selected={isSelected} />
+        <span className="text-xs sm:text-sm font-semibold text-foreground truncate">
+          {ext} {res ? `· ${res}` : abr ? `· ${abr}` : ""}
         </span>
-        {fps && (
-          <span className="text-xs text-muted-foreground font-mono">({fps})</span>
-        )}
-        {abr && (
-          <span className="text-xs text-muted-foreground font-mono">({abr})</span>
-        )}
-        {isRecommended && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-            <Star className="w-2.5 h-2.5 fill-current" /> Best Option
-          </span>
-        )}
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0">
+      {/* Right side: File size + Radio selection in 1 line */}
+      <div className="flex items-center gap-2 shrink-0">
         {size > 0 && (
-          <span className="text-xs font-mono font-medium text-muted-foreground">{formatSize(size)}</span>
+          <span className="text-xs font-mono text-muted-foreground">{formatSize(size)}</span>
         )}
-        <div className={cn(
-          "w-4 h-4 rounded-full border-2 transition-all shrink-0 flex items-center justify-center",
-          isSelected ? "border-primary bg-primary" : "border-muted-foreground/40 group-hover:border-primary/60"
-        )}>
-          {isSelected && (
-            <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+        <div
+          className={cn(
+            "w-4 h-4 rounded-full border-2 transition-all shrink-0 flex items-center justify-center",
+            isSelected ? "border-primary bg-primary" : "border-muted-foreground/40 group-hover:border-primary/60"
           )}
+        >
+          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
         </div>
       </div>
     </button>
@@ -152,13 +120,17 @@ function FormatRow({ format, badge, isSelected, isRecommended, onClick }: Format
 
 // ─── Advanced raw table ───────────────────────────────────
 
-function AdvancedTable({ formats, onSelect, selectedId }: {
+function AdvancedTable({
+  formats,
+  onSelect,
+  selectedId,
+}: {
   formats: FormatInfo[];
   onSelect: (f: FormatInfo) => void;
   selectedId: string | null;
 }) {
   return (
-    <div className="overflow-x-auto rounded-[16px] border border-border/60 bg-card">
+    <div className="overflow-x-auto rounded-[14px] border border-border/60 bg-card">
       <table className="w-full text-xs">
         <thead>
           <tr className="border-b border-border/50 bg-secondary/50 text-muted-foreground">
@@ -177,7 +149,7 @@ function AdvancedTable({ formats, onSelect, selectedId }: {
               key={f.format_id}
               onClick={() => onSelect(f)}
               className={cn(
-                "border-b border-border/40 last:border-0 cursor-pointer transition-colors",
+                "border-b border-border/40 last:border-0 cursor-pointer transition-colors whitespace-nowrap",
                 f.format_id === selectedId
                   ? "bg-primary/10 font-semibold text-primary"
                   : "hover:bg-secondary/50 text-foreground"
@@ -186,14 +158,20 @@ function AdvancedTable({ formats, onSelect, selectedId }: {
               <td className="px-3 py-2 font-mono text-muted-foreground">{f.format_id}</td>
               <td className="px-3 py-2 uppercase font-semibold">{f.ext}</td>
               <td className="px-3 py-2">{f.resolution || (f.abr ? `${Math.round(f.abr)}kbps` : "—")}</td>
-              <td className="px-3 py-2 font-mono hidden sm:table-cell text-muted-foreground max-w-[90px] truncate">{f.vcodec || "—"}</td>
-              <td className="px-3 py-2 font-mono hidden sm:table-cell text-muted-foreground max-w-[90px] truncate">{f.acodec || "—"}</td>
+              <td className="px-3 py-2 font-mono hidden sm:table-cell text-muted-foreground max-w-[90px] truncate">
+                {f.vcodec || "—"}
+              </td>
+              <td className="px-3 py-2 font-mono hidden sm:table-cell text-muted-foreground max-w-[90px] truncate">
+                {f.acodec || "—"}
+              </td>
               <td className="px-3 py-2 font-mono">{formatSize(bestSize(f))}</td>
               <td className="px-3 py-2">
-                <div className={cn(
-                  "w-3.5 h-3.5 rounded-full border-2",
-                  f.format_id === selectedId ? "border-primary bg-primary" : "border-muted-foreground/40"
-                )} />
+                <div
+                  className={cn(
+                    "w-3.5 h-3.5 rounded-full border-2",
+                    f.format_id === selectedId ? "border-primary bg-primary" : "border-muted-foreground/40"
+                  )}
+                />
               </td>
             </tr>
           ))}
@@ -224,7 +202,6 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
   // Build curated default set
   const curatedFormats = useMemo(() => {
     if (mode === "audio") {
-      // Best audio per bitrate tier
       const sorted = [...modeFormats].sort((a, b) => (b.abr ?? 0) - (a.abr ?? 0));
       const seen = new Set<string>();
       return sorted.filter((f) => {
@@ -234,7 +211,6 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
         return true;
       });
     }
-    // Video: one representative per quality badge, sorted best-first
     const withBadge = modeFormats.map((f) => ({ f, badge: getBadge(f) }));
     withBadge.sort((a, b) => b.badge.rank - a.badge.rank || (b.f.fps ?? 0) - (a.f.fps ?? 0));
     const seen = new Set<string>();
@@ -248,7 +224,6 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
   }, [modeFormats, mode]);
 
   const displayFormats = showAll ? modeFormats : curatedFormats;
-  const topFormat = curatedFormats[0] ?? null;
 
   if (modeFormats.length === 0) {
     return (
@@ -259,7 +234,7 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Format list */}
       <div className="flex flex-col gap-2">
         {displayFormats.map((f) => (
@@ -268,7 +243,6 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
             format={f}
             badge={getBadge(f)}
             isSelected={selectedFormat?.format_id === f.format_id}
-            isRecommended={!showAll && f === topFormat}
             onClick={() => onSelectFormat(f)}
           />
         ))}
@@ -278,7 +252,7 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
       <Button
         variant="ghost"
         size="sm"
-        className="w-full rounded-[14px] text-muted-foreground hover:text-foreground gap-1.5 mt-1 h-9 text-sm"
+        className="w-full rounded-[14px] text-muted-foreground hover:text-foreground gap-1.5 mt-1 h-9 text-xs sm:text-sm"
         onClick={() => setShowAll((v) => !v)}
       >
         {showAll ? (
@@ -295,8 +269,8 @@ export function FormatSelector({ formats, mode, selectedFormat, onSelectFormat }
       {/* Advanced raw table (only in expanded view) */}
       {showAll && (
         <div className="pt-2 space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
-            All formats — raw resolution stream data
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
+            All formats — raw stream data
           </p>
           <AdvancedTable
             formats={modeFormats}
