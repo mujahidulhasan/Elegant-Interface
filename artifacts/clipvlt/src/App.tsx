@@ -7,6 +7,7 @@ import { Downloader } from "@/pages/Downloader";
 import { BulkDownloader } from "@/pages/Bulk";
 import { HistoryPage } from "@/pages/History";
 import { SettingsPage } from "@/pages/Settings";
+import { DeveloperPage } from "@/pages/Developer";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
         <Route path="/bulk" component={BulkDownloader} />
         <Route path="/history" component={HistoryPage} />
         <Route path="/settings" component={SettingsPage} />
+        <Route path="/developer" component={DeveloperPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
