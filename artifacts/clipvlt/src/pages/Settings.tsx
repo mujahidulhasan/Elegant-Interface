@@ -29,7 +29,7 @@ function setPref(key: string, value: boolean) {
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-card rounded-[18px] p-6 card-shadow space-y-5">
+    <div className="bg-card rounded-[18px] p-4 sm:p-6 card-shadow space-y-4 sm:space-y-5 border border-border/60">
       <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{title}</h2>
       {children}
     </div>
@@ -40,20 +40,27 @@ function SettingRow({
   label,
   description,
   children,
+  stackOnMobile = false,
 }: {
   label: string;
   description?: string;
   children: React.ReactNode;
+  stackOnMobile?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className={cn(
+      "flex gap-3 sm:gap-4",
+      stackOnMobile
+        ? "flex-col sm:flex-row sm:items-center justify-between"
+        : "items-center justify-between"
+    )}>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">{label}</p>
         {description && (
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
         )}
       </div>
-      <div className="shrink-0">{children}</div>
+      <div className={cn("shrink-0", stackOnMobile && "w-full sm:w-auto flex sm:justify-end")}>{children}</div>
     </div>
   );
 }
@@ -65,7 +72,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
       aria-checked={value}
       onClick={() => onChange(!value)}
       className={cn(
-        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0",
         value ? "bg-primary" : "bg-secondary"
       )}
     >
@@ -110,16 +117,16 @@ export function SettingsPage() {
   ] as const;
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
+    <div className="w-full max-w-2xl mx-auto space-y-5 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 px-2 sm:px-0 pb-8">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[12px] bg-primary/10 text-primary flex items-center justify-center">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[12px] bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Settings2 className="w-5 h-5" />
           </div>
           Settings
         </h1>
-        <p className="text-muted-foreground text-sm pl-[52px]">
+        <p className="text-muted-foreground text-xs sm:text-sm pl-0 sm:pl-[52px]">
           Preferences are saved in your browser.
         </p>
       </div>
@@ -127,14 +134,18 @@ export function SettingsPage() {
       {/* ── Appearance ───────────────────────────────────── */}
       <SectionCard title="Appearance">
         {/* Theme selector */}
-        <SettingRow label="Theme" description="Choose between light, dark, or your system default.">
-          <div className="flex gap-1 rounded-[12px] bg-secondary p-1">
+        <SettingRow
+          label="Theme"
+          description="Choose between light, dark, or your system default."
+          stackOnMobile={true}
+        >
+          <div className="grid grid-cols-3 sm:flex gap-1 rounded-[12px] bg-secondary p-1 w-full sm:w-auto">
             {themes.map((t) => (
               <button
                 key={t.value}
                 onClick={() => setMode(t.value)}
                 className={cn(
-                  "px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all",
+                  "px-3 py-2 sm:py-1.5 rounded-[10px] text-xs font-semibold transition-all text-center",
                   mode === t.value
                     ? "bg-card text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -150,8 +161,9 @@ export function SettingsPage() {
         <SettingRow
           label="Accent Color"
           description="Choose a primary color for buttons and highlights."
+          stackOnMobile={true}
         >
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-1.5 pt-1 sm:pt-0">
             {ACCENT_PRESETS.map((preset) => {
               const isActive = accentColor === preset.value;
               return (
@@ -160,8 +172,8 @@ export function SettingsPage() {
                   title={preset.label}
                   onClick={() => setAccentColor(preset.value)}
                   className={cn(
-                    "w-7 h-7 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    isActive ? "ring-2 ring-offset-2 ring-offset-card scale-110" : "hover:scale-105"
+                    "w-7 h-7 sm:w-6 sm:h-6 rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0",
+                    isActive ? "ring-2 ring-offset-2 ring-offset-card scale-110" : "hover:scale-105 opacity-90 hover:opacity-100"
                   )}
                   style={{
                     backgroundColor: preset.value,
@@ -173,7 +185,7 @@ export function SettingsPage() {
             {accentColor && (
               <button
                 onClick={resetAccentColor}
-                className="ml-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-1"
+                className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 bg-secondary/80 sm:bg-transparent rounded-md"
                 title="Reset to default"
               >
                 Reset
