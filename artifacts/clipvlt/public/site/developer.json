@@ -1,11 +1,12 @@
 {
   "name": "Mujahidul Hasan",
-  "description": "Creator and maintainer of this application.",
-  "avatar": "/site/developer.png",
+  "role": "Creator & Lead Developer",
+  "description": "Creator and maintainer of Saveclp. Building fast, clean, and elegant web media interfaces.",
+  "avatar": "/site/dev.png",
   "website": "",
   "github": "https://github.com/mujahidulhasan",
   "telegram": "",
   "discord": "",
   "twitter": "",
-  "email": "freefireindunashia2@gmail.com"
+  "email": ""
 }
