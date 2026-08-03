@@ -53,8 +53,12 @@ export function detectPlatform(rawUrl: string): PlatformDef | null {
 }
 
 export function isLikelyUrl(value: string): boolean {
+  const v = value.trim();
+  if (!v) return false;
+  if (v.startsWith("http://") || v.startsWith("https://")) return true;
+  if (v.includes(".") && !v.includes(" ") && v.length >= 3) return true;
   try {
-    const u = new URL(value.trim());
+    const u = new URL(v.startsWith("http") ? v : `https://${v}`);
     return u.protocol === "http:" || u.protocol === "https:";
   } catch {
     return false;
