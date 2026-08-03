@@ -64,71 +64,18 @@ export function Navbar() {
         ? "bg-background/80 backdrop-blur-md border-border"
         : "bg-transparent border-transparent"
     )}>
-      <div className="container mx-auto max-w-5xl px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="hover:opacity-80 transition-opacity">
-          <SiteLogo />
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "sm" }),
-                "text-sm rounded-[16px] h-10 px-4 transition-colors",
-                location.startsWith(link.href)
-                  ? "bg-secondary font-semibold text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Right side icons */}
-        <div className="flex items-center gap-1">
-          {siteConfig.features.history && (
-            <Link
-              href="/history"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "hidden sm:flex rounded-[16px]",
-                location === "/history" && "bg-secondary"
-              )}
-              title="History"
-              aria-label="Download history"
-            >
-              <Clock className="w-5 h-5" />
-            </Link>
-          )}
-
-          {siteConfig.features.settings && (
-            <Link
-              href="/settings"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "hidden sm:flex rounded-[16px]",
-                location === "/settings" && "bg-secondary"
-              )}
-              title="Settings"
-              aria-label="Settings"
-            >
-              <Settings2 className="w-5 h-5" />
-            </Link>
-          )}
-
+      <div className="container mx-auto max-w-5xl px-4 h-16 flex items-center justify-between relative">
+        {/* Left Side: Theme Button + Mobile Menu Trigger */}
+        <div className="flex items-center gap-1 z-10">
           <Button
             variant="ghost"
             size="icon"
             className="rounded-[16px]"
             onClick={() => setMode(resolved === "dark" ? "light" : "dark")}
             aria-label={resolved === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={resolved === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {resolved === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {resolved === "dark" ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
           </Button>
 
           {/* Mobile menu */}
@@ -225,7 +172,7 @@ export function Navbar() {
                   className="flex items-center gap-3 h-[46px] px-3 rounded-[14px] transition-colors hover:bg-secondary/50"
                 >
                   <div className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 bg-secondary text-muted-foreground">
-                    {resolved === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    {resolved === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
                   </div>
                   <span className="text-base font-medium text-muted-foreground">
                     {resolved === "dark" ? "Light Mode" : "Dark Mode"}
@@ -234,6 +181,64 @@ export function Navbar() {
               </div>
             </SheetContent>
           </Sheet>
+        </div>
+
+        {/* Center Section: Site Logo */}
+        <div className="absolute left-1/2 -translate-x-1/2 z-10">
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <SiteLogo />
+          </Link>
+        </div>
+
+        {/* Right Side: Desktop Navigation Links & Utility Buttons */}
+        <div className="flex items-center gap-1 z-10">
+          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "text-sm rounded-[16px] h-10 px-4 transition-colors",
+                  location.startsWith(link.href)
+                    ? "bg-secondary font-semibold text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {siteConfig.features.history && (
+            <Link
+              href="/history"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "icon" }),
+                "hidden sm:flex rounded-[16px]",
+                location === "/history" && "bg-secondary"
+              )}
+              title="History"
+              aria-label="Download history"
+            >
+              <Clock className="w-5 h-5" />
+            </Link>
+          )}
+
+          {siteConfig.features.settings && (
+            <Link
+              href="/settings"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "icon" }),
+                "hidden sm:flex rounded-[16px]",
+                location === "/settings" && "bg-secondary"
+              )}
+              title="Settings"
+              aria-label="Settings"
+            >
+              <Settings2 className="w-5 h-5" />
+            </Link>
+          )}
         </div>
       </div>
     </header>
