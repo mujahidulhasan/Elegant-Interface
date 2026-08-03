@@ -73,7 +73,7 @@ const DEFAULTS: SiteSettings = {
     bulk:           true,
     nsfw:           true,
     settings:       true,
-    developer:      false,
+    developer:      true,
     toast:          true,
     animations:     true,
     adultPlatforms: false,
